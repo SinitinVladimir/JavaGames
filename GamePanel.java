@@ -32,6 +32,12 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
+        // this.addMouseMotionListener(new MouseMotionAdapter() {
+        //     @Override
+        //     public void mouseMoved(MouseEvent e) {
+        //         setDirectionBasedOnMouse(e.getX(), e.getY());
+        //     }
+        // });
         startGame();
     }
 
@@ -103,6 +109,27 @@ public class GamePanel extends JPanel implements ActionListener {
             isQuizFood = false;
         }
     }
+
+    // private void setDirectionBasedOnMouse(int mouseX, int mouseY) {
+    //     int headX = x[0];
+    //     int headY = y[0];
+    //     int deltaX = mouseX - headX;
+    //     int deltaY = mouseY - headY;
+    //     // Decide direction based on mouse position relative to snake head
+    //     if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    //         if (deltaX > 0 && direction != 'L') {
+    //             direction = 'R'; // Mouse is to the right of the head
+    //         } else if (deltaX < 0 && direction != 'R') {
+    //             direction = 'L'; // Mouse is to the left of the head
+    //         }
+    //     } else {
+    //         if (deltaY > 0 && direction != 'U') {
+    //             direction = 'D'; // Mouse is below the head
+    //         } else if (deltaY < 0 && direction != 'D') {
+    //             direction = 'U'; // Mouse is above the head
+    //         }
+    //     }
+    // }
 
     public void checkApple() {
         // normal food eaten
@@ -235,26 +262,30 @@ public class GamePanel extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
+                case KeyEvent.VK_A:
                     if (direction != 'R') {
                         direction = 'L';
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_D:
                     if (direction != 'L') {
                         direction = 'R';
                     }
                     break;
                 case KeyEvent.VK_UP:
+                case KeyEvent.VK_W:
                     if (direction != 'D') {
                         direction = 'U';
                     }
                     break;
                 case KeyEvent.VK_DOWN:
+                case KeyEvent.VK_S:
                     if (direction != 'U') {
                         direction = 'D';
                     }
                     break;
             }
         }
-    }
+    }    
 }
