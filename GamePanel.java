@@ -26,7 +26,7 @@ public class GamePanel extends JPanel implements ActionListener {
     Random random;
     boolean isSpecialFood = false;
 
-    GamePanel() {
+    GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.black);
@@ -38,6 +38,27 @@ public class GamePanel extends JPanel implements ActionListener {
         //         setDirectionBasedOnMouse(e.getX(), e.getY());
         //     }
         // });
+        startGame();
+        // game speed
+        switch (gameSpeed) {
+            case "Easy":
+                DELAY = 100;
+                break;
+            case "Medium":
+                DELAY = 75;
+                break;
+            case "Hard":
+                DELAY = 50;
+                break;
+        }
+
+        //  color settings
+        if (colorPalette.equals("Neon")) {
+            // color theme
+        }
+
+        // borders
+        this.setBorder(withBorders ? BorderFactory.createLineBorder(Color.gray) : null);
         startGame();
     }
 

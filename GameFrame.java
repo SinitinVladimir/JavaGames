@@ -14,6 +14,9 @@ public class GameFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        new GameFrame();
+        n
+        public GameFrame() {
+            this("Default Player", "Black and White", "Medium", true);
+        }ew GameFrame();
     }
 }
