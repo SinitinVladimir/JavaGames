@@ -8,7 +8,7 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-    static final int DELAY = 75;
+    int delay;  //  delay on game speed
     final int[] x = new int[GAME_UNITS];
     final int[] y = new int[GAME_UNITS];
     int bodyParts = 6;
@@ -20,52 +20,39 @@ public class GamePanel extends JPanel implements ActionListener {
     int quizAppleX;
     int quizAppleY;
     boolean isQuizFood = false;
-    char direction = 'R';  //direction variable
+    char direction = 'R';
     boolean running = false;
     Timer timer;
     Random random;
     boolean isSpecialFood = false;
 
-    GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
+    public GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
         random = new Random();
-        this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
-        this.setBackground(Color.black);
-        this.setFocusable(true);
-        this.addKeyListener(new MyKeyAdapter());
-        // this.addMouseMotionListener(new MouseMotionAdapter() {
-        //     @Override
-        //     public void mouseMoved(MouseEvent e) {
-        //         setDirectionBasedOnMouse(e.getX(), e.getY());
-        //     }
-        // });
-        startGame();
-        // game speed
+        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+        setBackground(Color.black);
+        setFocusable(true);
+        addKeyListener(new MyKeyAdapter());
+
         switch (gameSpeed) {
-            case "Easy":
-                DELAY = 100;
-                break;
-            case "Medium":
-                DELAY = 75;
-                break;
-            case "Hard":
-                DELAY = 50;
-                break;
+            case "Easy": delay = 100; break;
+            case "Medium": delay = 75; break;
+            case "Hard": delay = 50; break;
+            default: delay = 75; break;
         }
+
+        setBorder(withBorders ? BorderFactory.createLineBorder(Color.gray) : null);
+        startGame();
 
         //  color settings
         if (colorPalette.equals("Neon")) {
-            // color theme
+            // theme
         }
-
-        // borders
-        this.setBorder(withBorders ? BorderFactory.createLineBorder(Color.gray) : null);
-        startGame();
     }
 
     public void startGame() {
         newApple();
         running = true;
-        timer = new Timer(DELAY, this);
+        timer = new Timer(delay, this); // delay dynamically adjusted instead o DELAY
         timer.start();
     }
 

@@ -54,16 +54,15 @@ public class SetupGame extends JFrame {
     }
 
     private void startGame() {
-        // get settings from the setup form
         String playerName = playerNameField.getText();
         String colorPalette = (String) colorPaletteDropdown.getSelectedItem();
         String gameSpeed = (String) gameSpeedDropdown.getSelectedItem();
         boolean withBorders = bordersCheckBox.isSelected();
-
-        //launching a game instance with selected options
-        GameFrame gameFrame = new GameFrame(playerName, colorPalette, gameSpeed, withBorders);
-        dispose();  // close setup window
+    
+        new GameFrame(playerName, colorPalette, gameSpeed, withBorders);  // instantiation without variable
+        dispose();  // kill setup window
     }
+    
 
     private void showLeaderboard() {
         // the leaderboard functionality
