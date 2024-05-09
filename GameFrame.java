@@ -1,8 +1,23 @@
 import javax.swing.JFrame;
 
 public class GameFrame extends JFrame {
+    private GamePanel gamePanel;
+    private String colorPalette;
+    private String gameSpeed;
+    private boolean withBorders;
+
     public GameFrame(String playerName, String colorPalette, String gameSpeed, boolean withBorders) {
-        GamePanel gamePanel = new GamePanel(colorPalette, gameSpeed, withBorders);
+        this.colorPalette = colorPalette;
+        this.gameSpeed = gameSpeed;
+        this.withBorders = withBorders;
+        setupGame(playerName, colorPalette, gameSpeed, withBorders);
+    }
+
+    private void setupGame(String playerName, String colorPalette, String gameSpeed, boolean withBorders) {
+        if (gamePanel != null) {
+            this.remove(gamePanel);
+        }
+        gamePanel = new GamePanel(colorPalette, gameSpeed, withBorders);
         this.add(gamePanel);
         setTitle("Unusual Snake Game - " + playerName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -11,13 +26,14 @@ public class GameFrame extends JFrame {
         setVisible(true);
         setLocationRelativeTo(null);
     }
-    
-    // for testing only
-    // public static void main(String[] args) {
-    //     new GameFrame("Test Player", "Black and White", "Medium", true);
-    // }
 
-    // public static void main(String[] args) {
-    //     new GameFrame(); 
-    // }
+    public void restartGame() {
+        this.remove(gamePanel);
+        gamePanel = new GamePanel(colorPalette, gameSpeed, withBorders);
+        this.add(gamePanel);
+        gamePanel.requestFocusInWindow();
+        gamePanel.startGame();
+        this.revalidate();
+        this.repaint();
+    }
 }

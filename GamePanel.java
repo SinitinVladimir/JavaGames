@@ -8,7 +8,7 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-    int delay;  //  delay on game speed
+    int delay;
     final int[] x = new int[GAME_UNITS];
     final int[] y = new int[GAME_UNITS];
     int bodyParts = 6;
@@ -31,30 +31,36 @@ public class GamePanel extends JPanel implements ActionListener {
     private Color snakeBodyColor;
     private Timer colorTimer;
     private String gameSpeed;
+    private MyKeyAdapter keyAdapter;
 
     public GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
         this.gameSpeed = gameSpeed;
         random = new Random();
+        keyAdapter = new MyKeyAdapter();
+        addKeyListener(keyAdapter);
         applyColorPalette(colorPalette);
-        setBackground(Color.black);
         setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
-        addKeyListener(new MyKeyAdapter());
+        setupGameSettings(gameSpeed, withBorders);
+        startGame();
+    }
 
+    private void setupGameSettings(String gameSpeed, boolean withBorders) {
         switch (gameSpeed) {
             case "Easy": delay = 100; break;
             case "Medium": delay = 75; break;
             case "Hard": delay = 50; break;
             default: delay = 75; break;
         }
-
         setBorder(withBorders ? BorderFactory.createLineBorder(Color.gray) : null);
-        startGame();
+    }
 
-        //  color settings
-        if (colorPalette.equals("Neon")) {
-            // theme
-        }
+    public void restartGame() {
+        removeKeyListener(keyAdapter);
+        keyAdapter = new MyKeyAdapter();
+        addKeyListener(keyAdapter);
+        requestFocusInWindow();
+        startGame();
     }
 
     public String getGameSpeed() {
@@ -148,7 +154,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 break;
             case "High Contrast":
                 backgroundColor = Color.yellow;
-                foodColor = Color.black;
+                foodColor = Color.green;
                 snakeHeadColor = Color.red;
                 snakeBodyColor = Color.blue;
                 break;
@@ -222,9 +228,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
     // bb start method to include snakeGamePanel
     private void pauseSnakeAndStartBrickBreaker() {
-        running = false;  // freeze snake
+        running = false;
         timer.stop();
-
         JFrame gameFrame = new JFrame("Brick Breaker Game");
         BrickBreakerGame brickBreakerGame = new BrickBreakerGame(this, gameSpeed);
 
@@ -237,7 +242,7 @@ public class GamePanel extends JPanel implements ActionListener {
         gameFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                resumeSnakeGame();  // continue snske g
+                resumeSnakeGame();
             }
         });
     }
@@ -255,27 +260,22 @@ public class GamePanel extends JPanel implements ActionListener {
                 running = false;
             }
         }
-
         // check if head touches left border
         if (x[0] < 0) {
             running = false;
         }
-
         // check if head touches right border
         if (x[0] > SCREEN_WIDTH) {
             running = false;
         }
-
         // check if head touches top border
         if (y[0] < 0) {
             running = false;
         }
-
         // check if head touches bottom border
         if (y[0] > SCREEN_HEIGHT) {
             running = false;
         }
-
         if (!running) {
             timer.stop();
         }
@@ -288,7 +288,34 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+        
+        JButton resumeButton = new JButton("Resume");
+        resumeButton.addActionListener(e -> restartGame());
+        this.add(resumeButton);
+        resumeButton.setBounds(SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2 + 100, 100, 50);
+        this.repaint();
     }
+
+    // public void restartGame() {
+    //     // kill current game 
+    //     if (timer != null) {
+    //         timer.stop();
+    //     }
+    //     bodyParts = 6;
+    //     direction = 'R';
+    //     running = false;    
+    //     // Reset positions 
+    //     for (int i = 0; i < x.length; i++) {
+    //         x[i] = 0;
+    //         y[i] = 0;
+    //     }    
+    //     removeKeyListener(keyAdapter);
+    //     MyKeyAdapter keyAdapter = new MyKeyAdapter(); 
+    //     addKeyListener(keyAdapter);
+    //     requestFocusInWindow();
+
+    //     startGame();
+    // }
 
     public void pauseGame() {
         timer.stop();

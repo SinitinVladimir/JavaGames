@@ -20,7 +20,7 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
     private GamePanel snakeGamePanel;
 
     // constructor to accept the GamePanel instance
-    public BrickBreakerGame(GamePanel panel) {
+    public BrickBreakerGame(GamePanel panel, String gameSpeed) {
         this.snakeGamePanel = panel;
         initializeGameSpeed(gameSpeed);        
         map = new MapGenerator(3, 7);
@@ -43,9 +43,9 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
                 paddleSpeed = 20;
                 break;
             case "Hard":
-                ballSpeedX = -3;
-                ballSpeedY = -4;
-                paddleSpeed = 25;
+                ballSpeedX = -4;
+                ballSpeedY = -6;
+                paddleSpeed = 45;
                 break;
             default:
                 ballSpeedX = -1;

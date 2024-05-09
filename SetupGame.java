@@ -40,8 +40,8 @@ public class SetupGame extends JFrame {
             String gameSpeed = (String) gameSpeedDropdown.getSelectedItem();
             boolean withBorders = bordersCheckBox.isSelected();
 
-            GameFrame gameFrame = new GameFrame(playerName, colorPalette, gameSpeed, withBorders);
-            dispose();  // Close setup window
+            new GameFrame(playerName, colorPalette, gameSpeed, withBorders);
+            this.dispose();
         });
 
         leaderboardButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Leaderboard feature coming soon, may be:)"));
