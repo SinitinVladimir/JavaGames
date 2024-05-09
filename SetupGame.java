@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class SetupGame extends JFrame {
     private JTextField playerNameField;
@@ -16,7 +14,7 @@ public class SetupGame extends JFrame {
         setSize(400, 300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new GridLayout(6, 2, 10, 10));  // 6 rows, 2 columns
+        setLayout(new GridLayout(6, 2, 10, 10));
 
         playerNameField = new JTextField();
         colorPaletteDropdown = new JComboBox<>(new String[]{"Black and White", "Neon", "Pinky", "Dark", "High Contrast", "Party Mode"});
@@ -36,40 +34,22 @@ public class SetupGame extends JFrame {
         add(startButton);
         add(leaderboardButton);
 
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startGame();
-            }
+        startButton.addActionListener(e -> {
+            String playerName = playerNameField.getText();
+            String colorPalette = (String) colorPaletteDropdown.getSelectedItem();
+            String gameSpeed = (String) gameSpeedDropdown.getSelectedItem();
+            boolean withBorders = bordersCheckBox.isSelected();
+
+            GameFrame gameFrame = new GameFrame(playerName, colorPalette, gameSpeed, withBorders);
+            dispose();  // Close setup window
         });
 
-        leaderboardButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showLeaderboard();
-            }
-        });
+        leaderboardButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Leaderboard feature coming soon, may be:)"));
 
         setVisible(true);
     }
 
-    private void startGame() {
-        String playerName = playerNameField.getText();
-        String colorPalette = (String) colorPaletteDropdown.getSelectedItem();
-        String gameSpeed = (String) gameSpeedDropdown.getSelectedItem();
-        boolean withBorders = bordersCheckBox.isSelected();
-    
-        new GameFrame(playerName, colorPalette, gameSpeed, withBorders);  // instantiation without variable
-        dispose();  // kill setup window
-    }
-    
-
-    private void showLeaderboard() {
-        // the leaderboard functionality
-        JOptionPane.showMessageDialog(this, "Leaderboard feature coming soon, or not)");
-    }
-
     public static void main(String[] args) {
-        new SetupGame();
+        SwingUtilities.invokeLater(() -> new SetupGame());
     }
 }

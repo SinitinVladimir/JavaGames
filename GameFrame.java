@@ -1,7 +1,6 @@
 import javax.swing.JFrame;
 
 public class GameFrame extends JFrame {
-
     public GameFrame(String playerName, String colorPalette, String gameSpeed, boolean withBorders) {
         GamePanel gamePanel = new GamePanel(colorPalette, gameSpeed, withBorders);
         this.add(gamePanel);
@@ -12,12 +11,13 @@ public class GameFrame extends JFrame {
         setVisible(true);
         setLocationRelativeTo(null);
     }
+    
+    // for testing only
+    // public static void main(String[] args) {
+    //     new GameFrame("Test Player", "Black and White", "Medium", true);
+    // }
 
-    public GameFrame() {
-        this("Default Player", "Black and White", "Medium", true);
-    }
-
-    public static void main(String[] args) {
-        new GameFrame(); 
-    }
+    // public static void main(String[] args) {
+    //     new GameFrame(); 
+    // }
 }

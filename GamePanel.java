@@ -25,11 +25,19 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     Random random;
     boolean isSpecialFood = false;
+    private Color backgroundColor;
+    private Color foodColor;
+    private Color snakeHeadColor;
+    private Color snakeBodyColor;
+    private Timer colorTimer;
+    private String gameSpeed;
 
     public GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
+        this.gameSpeed = gameSpeed;
         random = new Random();
-        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+        applyColorPalette(colorPalette);
         setBackground(Color.black);
+        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         setFocusable(true);
         addKeyListener(new MyKeyAdapter());
 
@@ -49,6 +57,10 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+    public String getGameSpeed() {
+        return this.gameSpeed;
+    }
+    
     public void startGame() {
         newApple();
         running = true;
@@ -56,7 +68,8 @@ public class GamePanel extends JPanel implements ActionListener {
         timer.start();
     }
 
-    public void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
     }
@@ -64,7 +77,7 @@ public class GamePanel extends JPanel implements ActionListener {
     public void draw(Graphics g) {
         if (running) {
             // normal food
-            g.setColor(Color.red);
+            g.setColor(foodColor);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
             // brick Breaker food
@@ -81,19 +94,82 @@ public class GamePanel extends JPanel implements ActionListener {
             }
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
-                    g.setColor(Color.green);
-                    g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                    g.setColor(snakeHeadColor);
                 } else {
-                    g.setColor(new Color(45, 180, 0));
-                    g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                    g.setColor(snakeBodyColor);
                 }
+                g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
             }
-            g.setColor(Color.red);
-            g.setFont(new Font("Ink Free", Font.BOLD, 40));
-            FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
         } else {
             gameOver(g);
+        }
+    }
+
+    private void startPartyMode() {
+        colorTimer = new Timer(2000, e -> {
+            // change colors every 2 sec
+            foodColor = new Color((int) (Math.random() * 0x1000000));
+            snakeHeadColor = new Color((int) (Math.random() * 0x1000000));
+            snakeBodyColor = new Color((int) (Math.random() * 0x1000000));
+            repaint();
+        });
+        colorTimer.start();
+    }
+
+    private void applyColorPalette(String colorPalette) {
+        if (colorTimer != null) {  // ensure that any existing timer is stopped before switching modes
+            stopPartyMode();
+        }
+    
+        switch (colorPalette) {
+            case "Black and White":
+                backgroundColor = Color.white;
+                foodColor = Color.black;
+                snakeHeadColor = Color.gray;
+                snakeBodyColor = Color.darkGray;
+                break;
+            case "Neon":
+                backgroundColor = Color.black;
+                foodColor = Color.magenta;
+                snakeHeadColor = Color.green;
+                snakeBodyColor = Color.cyan;
+                break;
+            case "Pinky":
+                backgroundColor = new Color(255, 192, 203); // Pink
+                foodColor = new Color(255, 105, 180); // Hot Pink
+                snakeHeadColor = new Color(255, 20, 147); // Deep Pink
+                snakeBodyColor = new Color(199, 21, 133); // Medium Violet Red
+                break;
+            case "Dark":
+                backgroundColor = new Color(25, 25, 25);
+                foodColor = new Color(75, 75, 75);
+                snakeHeadColor = new Color(0, 100, 0);
+                snakeBodyColor = new Color(47, 79, 79);
+                break;
+            case "High Contrast":
+                backgroundColor = Color.yellow;
+                foodColor = Color.black;
+                snakeHeadColor = Color.red;
+                snakeBodyColor = Color.blue;
+                break;
+            case "Party Mode":
+                startPartyMode();
+                return; // to skip setting static colors
+            default:
+                backgroundColor = Color.black;
+                foodColor = Color.red;
+                snakeHeadColor = Color.green;
+                snakeBodyColor = new Color(45, 180, 0);
+                break;
+        }
+        setBackground(backgroundColor);
+        repaint();  // to apply a new color immediately
+    }
+    
+    
+    private void stopPartyMode() {
+        if (colorTimer != null) {
+            colorTimer.stop();
         }
     }
 
@@ -117,27 +193,6 @@ public class GamePanel extends JPanel implements ActionListener {
             isQuizFood = false;
         }
     }
-
-    // private void setDirectionBasedOnMouse(int mouseX, int mouseY) {
-    //     int headX = x[0];
-    //     int headY = y[0];
-    //     int deltaX = mouseX - headX;
-    //     int deltaY = mouseY - headY;
-    //     // Decide direction based on mouse position relative to snake head
-    //     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-    //         if (deltaX > 0 && direction != 'L') {
-    //             direction = 'R'; // Mouse is to the right of the head
-    //         } else if (deltaX < 0 && direction != 'R') {
-    //             direction = 'L'; // Mouse is to the left of the head
-    //         }
-    //     } else {
-    //         if (deltaY > 0 && direction != 'U') {
-    //             direction = 'D'; // Mouse is below the head
-    //         } else if (deltaY < 0 && direction != 'D') {
-    //             direction = 'U'; // Mouse is above the head
-    //         }
-    //     }
-    // }
 
     public void checkApple() {
         // normal food eaten
@@ -167,13 +222,11 @@ public class GamePanel extends JPanel implements ActionListener {
 
     // bb start method to include snakeGamePanel
     private void pauseSnakeAndStartBrickBreaker() {
-        running = false;
+        running = false;  // freeze snake
         timer.stop();
-        JOptionPane.showMessageDialog(this, "Press OK to start Brick Breaker");
 
-        // window for bb
         JFrame gameFrame = new JFrame("Brick Breaker Game");
-        BrickBreakerGame brickBreakerGame = new BrickBreakerGame(this);
+        BrickBreakerGame brickBreakerGame = new BrickBreakerGame(this, gameSpeed);
 
         gameFrame.add(brickBreakerGame);
         gameFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -181,13 +234,18 @@ public class GamePanel extends JPanel implements ActionListener {
         gameFrame.setResizable(false);
         gameFrame.setVisible(true);
         gameFrame.setLocationRelativeTo(null);
+        gameFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                resumeSnakeGame();  // continue snske g
+            }
+        });
     }
 
-
     public void resumeSnakeGame() {
-        JOptionPane.showMessageDialog(this, "Tetris game completed. Resuming Snake game.");
+        JOptionPane.showMessageDialog(this, "Returning to Snake Game.");
         running = true;
-        timer.start();
+        timer.start();  // reset tmeer
     }
 
     public void checkCollisions() {
@@ -224,11 +282,24 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void gameOver(Graphics g) {
-        // Game Over text
+        stopPartyMode();  // stop changing colors
+        // the game over message
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
-        FontMetrics metrics1 = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics1.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+    }
+
+    public void pauseGame() {
+        timer.stop();
+        running = false;
+    }
+
+    public void resumeGame() {
+        timer.start();
+        running = true;
+        requestFocusInWindow();
+        repaint();
     }
 
     @Override

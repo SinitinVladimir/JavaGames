@@ -18,6 +18,7 @@ public class QuizGame {
         this.snakeGamePanel = panel;
         createQuestions();
         setupUI();
+        snakeGamePanel.pauseGame();
     }
 
     private void createQuestions() {
@@ -87,6 +88,18 @@ public class QuizGame {
         JOptionPane.showMessageDialog(frame, "Quiz completed! Your score: " + score + "/" + questions.length);
         frame.dispose();
         snakeGamePanel.resumeSnakeGame();
+    }
+
+    private void setupUI() {
+        frame = new JFrame("Quiz");
+        JButton returnButton = new JButton("Return to Snake");
+        returnButton.addActionListener(e -> {
+            frame.dispose();
+            snakeGamePanel.resumeGame();
+        });
+        panel.add(returnButton);
+
+        frame.setVisible(true);
     }
 
     public void startQuiz() {

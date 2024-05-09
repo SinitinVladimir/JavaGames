@@ -13,13 +13,16 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
     private int ballXdir = -1;
     private int ballYdir = -2;
     private int totalBricks = 21;
+    private int ballSpeedX;
+    private int ballSpeedY;
+    private int paddleSpeed;
     private MapGenerator map;
-
     private GamePanel snakeGamePanel;
 
     // constructor to accept the GamePanel instance
     public BrickBreakerGame(GamePanel panel) {
         this.snakeGamePanel = panel;
+        initializeGameSpeed(gameSpeed);        
         map = new MapGenerator(3, 7);
         addKeyListener(this);
         setFocusable(true);
@@ -27,16 +30,40 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
         timer = new Timer(delay, this);
         timer.start();
     }
+    private void initializeGameSpeed(String speed) {
+        switch (speed) {
+            case "Easy":
+                ballSpeedX = -1;
+                ballSpeedY = -2;
+                paddleSpeed = 15;
+                break;
+            case "Medium":
+                ballSpeedX = -2;
+                ballSpeedY = -3;
+                paddleSpeed = 20;
+                break;
+            case "Hard":
+                ballSpeedX = -3;
+                ballSpeedY = -4;
+                paddleSpeed = 25;
+                break;
+            default:
+                ballSpeedX = -1;
+                ballSpeedY = -2;
+                paddleSpeed = 15;
+                break;
+        }
+    }
 
     // method when the game ends or the player wins
     private void finishGame() {
         timer.stop();
-        if (snakeGamePanel != null) {
-            // resume the snake on the event dispatch thread/
-            SwingUtilities.invokeLater(() -> {
-                snakeGamePanel.resumeSnakeGame();
-            });
-        }
+        JOptionPane.showMessageDialog(null, "Return to snake game");
+        SwingUtilities.invokeLater(() -> {
+            snakeGamePanel.resumeSnakeGame();
+        });
+        Window win = SwingUtilities.getWindowAncestor(this);
+        win.dispose();  // kill bb
     }
 
     public void paint(Graphics g) {
@@ -84,6 +111,8 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
     public void actionPerformed(ActionEvent e) {
         timer.start();
         if (play) {
+            ballposX += ballSpeedX;
+            ballposY += ballSpeedY;
             if (new Rectangle(ballposX, ballposY, 20, 20).intersects(new Rectangle(playerX, 550, 100, 8))) {
                 ballYdir = -ballYdir;
             }
@@ -174,13 +203,15 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
     }
 
     public void moveRight() {
-        play = true;
-        playerX += 20;
+        if (playerX + paddleSpeed <= getWidth() - 100) {
+            playerX += paddleSpeed;
+        }
     }
 
     public void moveLeft() {
-        play = true;
-        playerX -= 20;
+        if (playerX - paddleSpeed >= 0) {
+            playerX -= paddleSpeed;
+        }
     }
 }
 
