@@ -253,33 +253,59 @@ public class GamePanel extends JPanel implements ActionListener {
         timer.start();  // reset tmeer
     }
 
+    // public void checkCollisions() {
+    //     // check if head collides with body
+    //     for (int i = bodyParts; i > 0; i--) {
+    //         if ((x[0] == x[i]) && (y[0] == y[i])) {
+    //             running = false;
+    //         }
+    //     }
+    //     // check if head touches left border
+    //     if (x[0] < 0) {
+    //         running = false;
+    //     }
+    //     // check if head touches right border
+    //     if (x[0] > SCREEN_WIDTH) {
+    //         running = false;
+    //     }
+    //     // check if head touches top border
+    //     if (y[0] < 0) {
+    //         running = false;
+    //     }
+    //     // check if head touches bottom border
+    //     if (y[0] > SCREEN_HEIGHT) {
+    //         running = false;
+    //     }
+    //     if (!running) {
+    //         timer.stop();
+    //     }
+    // }
+
     public void checkCollisions() {
-        // check if head collides with body
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
+                timer.stop();
             }
         }
-        // check if head touches left border
+    
         if (x[0] < 0) {
-            running = false;
+            x[0] = SCREEN_WIDTH - UNIT_SIZE;
+        } else if (x[0] >= SCREEN_WIDTH) {
+            x[0] = 0;
         }
-        // check if head touches right border
-        if (x[0] > SCREEN_WIDTH) {
-            running = false;
-        }
-        // check if head touches top border
+    
         if (y[0] < 0) {
-            running = false;
+            y[0] = SCREEN_HEIGHT - UNIT_SIZE;
+        } else if (y[0] >= SCREEN_HEIGHT) {
+            y[0] = 0;
         }
-        // check if head touches bottom border
-        if (y[0] > SCREEN_HEIGHT) {
-            running = false;
-        }
-        if (!running) {
-            timer.stop();
+    
+        if (running) {
+            timer.start();
         }
     }
+    
 
     public void gameOver(Graphics g) {
         stopPartyMode();  // stop changing colors

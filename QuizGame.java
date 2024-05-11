@@ -90,18 +90,6 @@ public class QuizGame {
         snakeGamePanel.resumeSnakeGame();
     }
 
-    private void setupUI() {
-        frame = new JFrame("Quiz");
-        JButton returnButton = new JButton("Return to Snake");
-        returnButton.addActionListener(e -> {
-            frame.dispose();
-            snakeGamePanel.resumeGame();
-        });
-        panel.add(returnButton);
-
-        frame.setVisible(true);
-    }
-
     public void startQuiz() {
         // to initiate the quiz externally, may be later
     }
