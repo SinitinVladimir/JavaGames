@@ -31,11 +31,14 @@ public class GamePanel extends JPanel implements ActionListener {
     private Color snakeBodyColor;
     private Timer colorTimer;
     private String gameSpeed;
-    private MyKeyAdapter keyAdapter;
+    private MyKeyAdapter keyAdapter;    
+    private GameEventListener gameEventListener;
+    private boolean withBorders;
 
-    public GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
+    public GamePanel(String colorPalette, String gameSpeed, boolean withBorders, GameEventListener listener) {
         this.gameSpeed = gameSpeed;
         this.withBorders = withBorders;
+        this.gameEventListener = listener;
         random = new Random();
         keyAdapter = new MyKeyAdapter();
         addKeyListener(keyAdapter);
@@ -45,18 +48,19 @@ public class GamePanel extends JPanel implements ActionListener {
         setupGameSettings(gameSpeed, withBorders);
         startGame();
     }
-
+    
     private void setupGameSettings(String gameSpeed, boolean withBorders) {
         switch (gameSpeed) {
             case "Easy": delay = 100; break;
             case "Medium": delay = 75; break;
             case "Hard": delay = 50; break;
             default: delay = 75; break;
-            if (withBorders) {
-                setBorder(BorderFactory.createLineBorder(Color.gray));
-            } else {
-                setBorder(null);
-            }
+        }
+        if (withBorders) {
+            setBorder(BorderFactory.createLineBorder(Color.gray));
+        } else {
+            setBorder(null);
+        }
     }
 
     public void restartGame() {
@@ -256,31 +260,34 @@ public class GamePanel extends JPanel implements ActionListener {
         running = true;
         timer.start();  // reset tmeer
     }
+    
     public void checkCollisions() {
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
-                running = false;
-                timer.stop();
+                gameEventListener.onGameRestartRequested();
+                return;
             }
         }
-    
-        if (x[0] < 0) {
-            x[0] = SCREEN_WIDTH - UNIT_SIZE;
-        } else if (x[0] >= SCREEN_WIDTH) {
-            x[0] = 0;
-        }
-    
-        if (y[0] < 0) {
-            y[0] = SCREEN_HEIGHT - UNIT_SIZE;
-        } else if (y[0] >= SCREEN_HEIGHT) {
-            y[0] = 0;
-        }
-    
-        if (running) {
-            timer.start();
+
+        if (withBorders) {
+            if (x[0] < 0 || x[0] >= SCREEN_WIDTH || y[0] < 0 || y[0] >= SCREEN_HEIGHT) {
+                gameEventListener.onGameRestartRequested();
+                return;
+            }
+        } else {
+            // Portal-like behavior
+            if (x[0] < 0) {
+                x[0] = SCREEN_WIDTH - UNIT_SIZE;
+            } else if (x[0] >= SCREEN_WIDTH) {
+                x[0] = 0;
+            }
+            if (y[0] < 0) {
+                y[0] = SCREEN_HEIGHT - UNIT_SIZE;
+            } else if (y[0] >= SCREEN_HEIGHT) {
+                y[0] = 0;
+            }
         }
     }
-    
 
     public void gameOver(Graphics g) {
         stopPartyMode();  // stop changing colors
@@ -342,6 +349,10 @@ public class GamePanel extends JPanel implements ActionListener {
                 break;
         }
     }
+
+    public interface GameEventListener {
+        void onGameRestartRequested();
+    }    
 
     public class MyKeyAdapter extends KeyAdapter {
         @Override
