@@ -35,6 +35,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public GamePanel(String colorPalette, String gameSpeed, boolean withBorders) {
         this.gameSpeed = gameSpeed;
+        this.withBorders = withBorders;
         random = new Random();
         keyAdapter = new MyKeyAdapter();
         addKeyListener(keyAdapter);
@@ -51,8 +52,11 @@ public class GamePanel extends JPanel implements ActionListener {
             case "Medium": delay = 75; break;
             case "Hard": delay = 50; break;
             default: delay = 75; break;
-        }
-        setBorder(withBorders ? BorderFactory.createLineBorder(Color.gray) : null);
+            if (withBorders) {
+                setBorder(BorderFactory.createLineBorder(Color.gray));
+            } else {
+                setBorder(null);
+            }
     }
 
     public void restartGame() {
@@ -252,35 +256,6 @@ public class GamePanel extends JPanel implements ActionListener {
         running = true;
         timer.start();  // reset tmeer
     }
-
-    // public void checkCollisions() {
-    //     // check if head collides with body
-    //     for (int i = bodyParts; i > 0; i--) {
-    //         if ((x[0] == x[i]) && (y[0] == y[i])) {
-    //             running = false;
-    //         }
-    //     }
-    //     // check if head touches left border
-    //     if (x[0] < 0) {
-    //         running = false;
-    //     }
-    //     // check if head touches right border
-    //     if (x[0] > SCREEN_WIDTH) {
-    //         running = false;
-    //     }
-    //     // check if head touches top border
-    //     if (y[0] < 0) {
-    //         running = false;
-    //     }
-    //     // check if head touches bottom border
-    //     if (y[0] > SCREEN_HEIGHT) {
-    //         running = false;
-    //     }
-    //     if (!running) {
-    //         timer.stop();
-    //     }
-    // }
-
     public void checkCollisions() {
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
@@ -321,27 +296,6 @@ public class GamePanel extends JPanel implements ActionListener {
         resumeButton.setBounds(SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2 + 100, 100, 50);
         this.repaint();
     }
-
-    // public void restartGame() {
-    //     // kill current game 
-    //     if (timer != null) {
-    //         timer.stop();
-    //     }
-    //     bodyParts = 6;
-    //     direction = 'R';
-    //     running = false;    
-    //     // Reset positions 
-    //     for (int i = 0; i < x.length; i++) {
-    //         x[i] = 0;
-    //         y[i] = 0;
-    //     }    
-    //     removeKeyListener(keyAdapter);
-    //     MyKeyAdapter keyAdapter = new MyKeyAdapter(); 
-    //     addKeyListener(keyAdapter);
-    //     requestFocusInWindow();
-
-    //     startGame();
-    // }
 
     public void pauseGame() {
         timer.stop();

@@ -70,6 +70,10 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
         // background
         g.setColor(Color.black);
         g.fillRect(1, 1, 692, 592);
+        g.setColor(Color.yellow);
+        g.fillRect(0, 0, 3, 592);
+        g.fillRect(0, 0, 692, 3);
+        g.fillRect(691, 0, 3, 592);
 
         // map
         map.draw((Graphics2D) g);
