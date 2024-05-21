@@ -1,7 +1,7 @@
 import javax.swing.JFrame;
 
-public class GameFrame extends JFrame implements GamePanel.GameEventListener {
-    private GamePanel gamePanel;
+public class GameFrame extends JFrame implements OldGamePanel.GameEventListener {
+    private OldGamePanel gamePanel;
     private String colorPalette;
     private String gameSpeed;
     private boolean withBorders;
@@ -17,7 +17,7 @@ public class GameFrame extends JFrame implements GamePanel.GameEventListener {
         if (gamePanel != null) {
             this.remove(gamePanel);
         }
-        gamePanel = new GamePanel(colorPalette, gameSpeed, withBorders, this);
+        gamePanel = new OldGamePanel(colorPalette, gameSpeed, withBorders, this);
         this.add(gamePanel);
         setTitle("Unusual Snake Game - " + playerName);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,7 +34,7 @@ public class GameFrame extends JFrame implements GamePanel.GameEventListener {
 
     public void restartGame() {
         this.remove(gamePanel);
-        gamePanel = new GamePanel(colorPalette, gameSpeed, withBorders, this);
+        gamePanel = new OldGamePanel(colorPalette, gameSpeed, withBorders, this);
         this.add(gamePanel);
         gamePanel.requestFocusInWindow();
         gamePanel.startGame();

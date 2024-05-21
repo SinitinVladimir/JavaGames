@@ -17,10 +17,10 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
     private int ballSpeedY;
     private int paddleSpeed;
     private MapGenerator map;
-    private GamePanel snakeGamePanel;
+    private OldGamePanel snakeGamePanel;
 
     // constructor to accept the GamePanel instance
-    public BrickBreakerGame(GamePanel panel, String gameSpeed) {
+    public BrickBreakerGame(OldGamePanel panel, String gameSpeed) {
         this.snakeGamePanel = panel;
         initializeGameSpeed(gameSpeed);        
         map = new MapGenerator(3, 7);
