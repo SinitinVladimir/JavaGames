@@ -19,7 +19,6 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
     private MapGenerator map;
     private OldGamePanel snakeGamePanel;
 
-    // constructor to accept the GamePanel instance
     public BrickBreakerGame(OldGamePanel panel, String gameSpeed) {
         this.snakeGamePanel = panel;
         initializeGameSpeed(gameSpeed);        
@@ -55,7 +54,6 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
         }
     }
 
-    // method when the game ends or the player wins
     private void finishGame() {
         timer.stop();
         JOptionPane.showMessageDialog(null, "Return to snake game");
@@ -63,7 +61,7 @@ public class BrickBreakerGame extends JPanel implements KeyListener, ActionListe
             snakeGamePanel.resumeSnakeGame();
         });
         Window win = SwingUtilities.getWindowAncestor(this);
-        win.dispose();  // kill bb
+        win.dispose();  
     }
 
     public void paint(Graphics g) {

@@ -75,8 +75,11 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
         resumeButton = new JButton("Resume");
         resumeButton.setBounds(screenWidth - 150, screenHeight - 150, 100, 30);
         resumeButton.addActionListener(e -> {
-            gamePanel.resumeSnakeGame(currentScore);
-            frame.dispose();
+            gamePanel.resumeSnakeGame(currentScore / 100); // Update the snake game score
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window != null) {
+                window.dispose();
+            }
         });
         add(resumeButton);
 
@@ -98,8 +101,8 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
     public void startGame() {
         frame = new JFrame("Brick Breaker");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Make the frame full screen
-        frame.setUndecorated(true); // Remove title bar
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setUndecorated(true);
         frame.add(this);
         frame.setVisible(true);
     }
@@ -107,13 +110,16 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
     private void exitGame() {
         gameRunning = false;
         timer.stop();
-        System.exit(0); // Terminate the application completely
+        System.exit(0); // kill the application
     }
 
     private void reloadGame() {
         gameRunning = false;
         timer.stop();
-        frame.dispose();
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window != null) {
+            window.dispose();
+        }
         BrickBreaker newGame = new BrickBreaker(gamePanel, playerName, gameSpeed, 0);
         newGame.startGame();
     }
@@ -195,12 +201,12 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
     }
 
     private void checkCollision() {
-        // Paddle collision
+        // paddle 
         if (new Rectangle(ballPosX, ballPosY, 20, 20).intersects(new Rectangle(paddleX, paddleY, 150, 10))) {
             ballDirY = -ballDirY;
         }
 
-        // Brick collision
+        // brick 
         int bricksStartX = (screenWidth - (brickColumns * brickWidth)) / 2;
         for (int i = 0; i < brickRows; i++) {
             for (int j = 0; j < brickColumns; j++) {
@@ -213,9 +219,9 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
 
                     if (ballRect.intersects(brickRect)) {
                         bricks[i][j] = 0;
-                        currentScore += 1/10;
+                        currentScore += 10;
 
-                        // Ball collision logic with bricks
+                        // ball collision logic with bricks
                         if (ballPosX + 19 <= brickRect.x || ballPosX + 1 >= brickRect.x + brickRect.width) {
                             ballDirX = -ballDirX;
                         } else {
@@ -229,7 +235,7 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
 
     @Override
     public void keyPressed(KeyEvent e) {
-        int paddleSpeed = 30; // Increase paddle speed
+        int paddleSpeed = 30; // increase paddle speed
 
         if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
             if (paddleX > 0) {
@@ -237,18 +243,20 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
-            if (paddleX < screenWidth - 150) { // Screen width - paddle width
+            if (paddleX < screenWidth - 150) { // screen width - paddle width
                 paddleX += paddleSpeed;
             }
         }
+
+        // vertical paddle movement
         if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
             if (paddleY > 0) {
                 paddleY -= paddleSpeed;
             }
         }
         if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
-            if (paddleY < screenHeight - 10) { // Screen height - paddle height
-                paddleY += paddleSpeed;            
+            if (paddleY < screenHeight - 10) { // ensure the paddle stays within the screen
+                paddleY += paddleSpeed;
             }
         }
     }
@@ -272,7 +280,7 @@ public class BrickBreaker extends JPanel implements ActionListener, KeyListener 
             case "Hard":
                 return 3;
             default:
-                return 2; // Default to Medium if gameSpeed is not recognized
+                return 2; // Default
         }
     }
 }

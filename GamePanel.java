@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
@@ -26,9 +30,12 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean isSpecialFood = false;
     char direction = 'R';
     boolean running = false;
+    boolean gameOverFlag = false;
     Timer timer;
     Random random;
-    private JButton reloadButton; // reloadButton as a class variable
+    private JButton reloadButton;
+    private JButton exitButton;
+    private JButton resumeButton;
     private Color backgroundColor;
     private Color foodColor;
     private Color snakeHeadColor;
@@ -40,26 +47,49 @@ public class GamePanel extends JPanel implements ActionListener {
     private boolean withBorders;
     private String playerName;
     private JLabel scoreLabel;
+    private boolean threeDBehavior;
+    private static final int MARGIN_SIZE = 100;
 
-    public GamePanel(String colorPalette, String gameSpeed, boolean withBorders, SnakeGame listener) {
-        this.playerName = listener.getTitle().replace("Unusual Snake Game - ", ""); // Extract player name from title
-        this.gameSpeed = gameSpeed;
+    public GamePanel(String colorPalette, String gameSpeed, boolean withBorders, SnakeGame listener, boolean threeDBehavior) {
+        this.playerName = listener.getTitle().replace("Unusual Snake Game - ", "");
         this.withBorders = withBorders;
+        this.threeDBehavior = threeDBehavior;
         this.gameEventListener = listener;
         random = new Random();
         keyAdapter = new MyKeyAdapter();
         addKeyListener(keyAdapter);
         applyColorPalette(colorPalette);
-        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+        setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT + MARGIN_SIZE));
         setFocusable(true);
         setupGameSettings(gameSpeed, withBorders);
         startGame();
 
+        setLayout(null);
         scoreLabel = new JLabel();
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 14));
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        scoreLabel.setBounds(10, SCREEN_HEIGHT + 10, 300, 30);
+        add(scoreLabel);
+
         updateScoreLabel();
-        this.add(scoreLabel);
+
+        // exit button
+        exitButton = new JButton("Exit");
+        exitButton.setBounds(450, SCREEN_HEIGHT + 10, 100, 30);
+        exitButton.addActionListener(e -> exitGame());
+        add(exitButton);
+
+        // reload button
+        reloadButton = new JButton("Reload");
+        reloadButton.setBounds(330, SCREEN_HEIGHT + 10, 100, 30);
+        reloadButton.addActionListener(e -> reloadGame());
+        add(reloadButton);
+
+        // resume button
+        resumeButton = new JButton("Resume");
+        resumeButton.setBounds(210, SCREEN_HEIGHT + 10, 100, 30);
+        resumeButton.addActionListener(e -> resumeGame());
+        add(resumeButton);
     }
 
     private void setupGameSettings(String gameSpeed, boolean withBorders) {
@@ -96,7 +126,7 @@ public class GamePanel extends JPanel implements ActionListener {
     public void startGame() {
         newApple();
         running = true;
-        timer = new Timer(delay, this); // delay dynamically adjusted instead of fixed DELAY
+        timer = new Timer(delay, this); // delay dynamically adjusted
         timer.start();
     }
 
@@ -108,6 +138,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void draw(Graphics g) {
         if (running) {
+            // margin area
+            g.setColor(Color.LIGHT_GRAY);
+            g.fillRect(0, SCREEN_HEIGHT, SCREEN_WIDTH, MARGIN_SIZE);
+
             // normal food
             g.setColor(foodColor);
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
@@ -146,18 +180,19 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void startPartyMode() {
-        colorTimer = new Timer(2000, e -> {
-            // change colors every 2 sec
+        colorTimer = new Timer(200, e -> {
+            // change colors every .2 sec
             foodColor = new Color((int) (Math.random() * 0x1000000));
             snakeHeadColor = new Color((int) (Math.random() * 0x1000000));
             snakeBodyColor = new Color((int) (Math.random() * 0x1000000));
+            backgroundColor = new Color((int) (Math.random() * 0x1000000));
             repaint();
         });
         colorTimer.start();
     }
 
     private void applyColorPalette(String colorPalette) {
-        if (colorTimer != null) {  // ensure that any existing timer is stopped before switching modes
+        if (colorTimer != null) {
             stopPartyMode();
         }
 
@@ -213,7 +248,7 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void newApple() {
-        // Reset all food flags
+        // reset all food flags
         isSpecialFood = false;
         isQuizFood = false;
         isTicTacToeFood = false;
@@ -222,8 +257,8 @@ public class GamePanel extends JPanel implements ActionListener {
         appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
         appleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
 
-        // Randomly decide which special food to spawn
-        int foodType = random.nextInt(4); // number between 0 and 3
+        // randomly decide which special food will be spawn
+        int foodType = random.nextInt(4);
         if (foodType == 0) {
             isSpecialFood = true;
             specialAppleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
@@ -248,19 +283,25 @@ public class GamePanel extends JPanel implements ActionListener {
             updateScoreLabel();
         }
 
-        // special brick breaker food eaten
+        // brick breaker food eaten
         if (isSpecialFood && (x[0] == specialAppleX) && (y[0] == specialAppleY)) {
+            isSpecialFood = false;
             pauseSnakeAndStartBrickBreaker();
+            newApple();
         }
 
         // quiz food eaten, start quiz
         if (isQuizFood && (x[0] == quizAppleX) && (y[0] == quizAppleY)) {
+            isQuizFood = false;
             pauseSnakeAndStartQuiz();
+            newApple();
         }
 
-        // Tic Tac Toe food eaten, start Tic Tac Toe
+        // Tic Tac Toe food eaten and start
         if (isTicTacToeFood && (x[0] == ticTacToeAppleX) && (y[0] == ticTacToeAppleY)) {
+            isTicTacToeFood = false;
             pauseSnakeAndStartTicTacToe();
+            newApple();
         }
     }
 
@@ -275,32 +316,31 @@ public class GamePanel extends JPanel implements ActionListener {
         running = false;
         timer.stop();
         JFrame gameFrame = new JFrame("Brick Breaker Game");
-        BrickBreaker brickBreaker = new BrickBreaker(this, playerName, gameSpeed, applesEaten*100);
+        BrickBreaker brickBreaker = new BrickBreaker(this, playerName, gameSpeed, applesEaten * 100);
         gameFrame.add(brickBreaker);
         gameFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        gameFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Make the frame full screen
-        gameFrame.setUndecorated(true); // Remove title bar
+        gameFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); // frame full screen
+        gameFrame.setUndecorated(true);
         gameFrame.setVisible(true);
         gameFrame.setLocationRelativeTo(null);
         gameFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                resumeSnakeGame(brickBreaker.getScore());
+                resumeSnakeGame(brickBreaker.getScore() / 100); // normalize score
             }
         });
     }
-    
 
     private void pauseSnakeAndStartTicTacToe() {
         running = false;
         timer.stop();
         JFrame gameFrame = new JFrame("Tic Tac Toe Game");
         TicTacToe ticTacToe = new TicTacToe(this, playerName, gameSpeed, applesEaten);
-    
+
         gameFrame.add(ticTacToe);
         gameFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        gameFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Make the frame full screen
-        gameFrame.setUndecorated(true); // Remove title bar
+        gameFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        gameFrame.setUndecorated(true);
         gameFrame.setVisible(true);
         gameFrame.setLocationRelativeTo(null);
         gameFrame.addWindowListener(new WindowAdapter() {
@@ -313,75 +353,59 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void resumeSnakeGame(int updatedScore) {
         applesEaten = updatedScore;
-        bodyParts = 6 + (applesEaten * 1); // Update body parts based on new score
-        JOptionPane.showMessageDialog(this, "Returning to Snake Game.");
+        bodyParts = 6 + (applesEaten * 1); // body parts - on new score
         running = true;
         updateScoreLabel();
+        requestFocusInWindow(); // game panel focused
+        JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(this), "Returning to Snake Game.");
         timer.start();
+        startPartyMode();
     }
 
-    public void checkCollisions() {
-        for (int i = bodyParts; i > 0; i--) {
-            if ((x[0] == x[i]) && (y[0] == y[i])) {
-                gameEventListener.onGameRestartRequested();
-                return;
-            }
-        }
-
-        if (withBorders) {
-            if (x[0] < 0 || x[0] >= SCREEN_WIDTH || y[0] < 0 || y[0] >= SCREEN_HEIGHT) {
-                gameEventListener.onGameRestartRequested();
-                return;
-            }
-        } else {
-            // Portal-like behavior
-            if (x[0] < 0) {
-                x[0] = SCREEN_WIDTH - UNIT_SIZE;
-            } else if (x[0] >= SCREEN_WIDTH) {
-                x[0] = 0;
-            }
-            if (y[0] < 0) {
-                y[0] = SCREEN_HEIGHT - UNIT_SIZE;
-            } else if (y[0] >= SCREEN_HEIGHT) {
-                y[0] = 0;
-            }
+    private void saveScoreToDatabase() {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/snake", "root", "");
+             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO leaderboards (player_name, score, difficulty) VALUES (?, ?, ?)")) {
+            pstmt.setString(1, playerName);
+            pstmt.setInt(2, applesEaten);
+            pstmt.setString(3, gameSpeed);
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
-    // Updated gameOver method
-    public void gameOver(Graphics g) {
-        stopPartyMode();  // stop changing colors
-        // the game over message
-        g.setColor(Color.red);
-        g.setFont(new Font("Ink Free", Font.BOLD, 75));
-        FontMetrics metrics = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
-
-        if (reloadButton == null) {
-            reloadButton = new JButton("Reload");
-            reloadButton.addActionListener(e -> {
-                restartGame();
-                this.remove(reloadButton);  // Remove the button after it is pressed
-                reloadButton = null;  // Reset the button reference
-            });
-            this.add(reloadButton);
-            reloadButton.setBounds(SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2 + 100, 100, 50);
-        }
-        this.repaint();
+    private void exitGame() {
+        saveScoreToDatabase(); // Save score before exiting
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        topFrame.dispose();
+        System.exit(0); // ensure all windows are closed
     }
+
+    private void reloadGame() {
+        saveScoreToDatabase(); // save score before reloading
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        topFrame.dispose();
+        SwingUtilities.invokeLater(() -> new SnakeGame.SetupGame().setVisible(true));
+    }
+
+    private void resumeGame() {
+        saveScoreToDatabase(); // save score before resuming
+        applesEaten = 0; // reset score
+        bodyParts = 6; // Reset snake body
+        direction = 'R'; // reset the direction
+        removeKeyListener(keyAdapter);
+        keyAdapter = new MyKeyAdapter();
+        addKeyListener(keyAdapter);
+        requestFocusInWindow();
+        startGame();
+        updateScoreLabel();
+    }    
 
     public void pauseGame() {
         timer.stop();
         running = false;
     }
-
-    public void resumeGame() {
-        timer.start();
-        running = true;
-        requestFocusInWindow();
-        repaint();
-    }
-
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if (running) {
@@ -393,13 +417,13 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void move() {
-        // body movement
+        // body 
         for (int i = bodyParts; i > 0; i--) {
             x[i] = x[(i - 1)];
             y[i] = y[(i - 1)];
         }
 
-        // head movement
+        // head 
         switch (direction) {
             case 'U':
                 y[0] = y[0] - UNIT_SIZE;
@@ -416,13 +440,66 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+    public void checkCollisions() {
+        if (!threeDBehavior) { // check for self-collisions if 3D Behavior is disabled
+            for (int i = bodyParts; i > 0; i--) {
+                if ((x[0] == x[i]) && (y[0] == y[i])) {
+                    gameOverFlag = true;
+                    gameEventListener.onGameRestartRequested();
+                    return;
+                }
+            }
+        }
+
+        if (withBorders) {
+            if (x[0] < 0 || x[0] >= SCREEN_WIDTH || y[0] < 0 || y[0] >= SCREEN_HEIGHT) {
+                gameOverFlag = true;
+                gameEventListener.onGameRestartRequested();
+                return;
+            }
+        } else {
+            // portal-like behavior
+            if (x[0] < 0) {
+                x[0] = SCREEN_WIDTH - UNIT_SIZE;
+            } else if (x[0] >= SCREEN_WIDTH) {
+                x[0] = 0;
+            }
+            if (y[0] < 0) {
+                y[0] = SCREEN_HEIGHT - UNIT_SIZE;
+            } else if (y[0] >= SCREEN_HEIGHT) {
+                y[0] = 0;
+            }
+        }
+    }
+
+    public void gameOver(Graphics g) {
+        stopPartyMode();  // stop party
+
+        if (!gameOverFlag) {
+            gameOverFlag = true;
+            saveScoreToDatabase();
+        }
+
+        // the game over message
+        g.setColor(Color.red);
+        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+
+        repaint();
+    }
     public interface GameEventListener {
         void onGameRestartRequested();
     }
+    
 
     public class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
+            if (!running) {
+                return;
+            }
+
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_A:
@@ -452,4 +529,3 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 }
-

@@ -7,10 +7,10 @@ public class TicTacToe extends JFrame {
     private JButton[] buttons = new JButton[9];
     private JLabel playerInfo;
     private JButton resumeButton, exitButton;
-    private boolean playerTurn = true; // Player starts the game
+    private boolean playerTurn = true; // starts the game
     private String playerName;
     private int currentScore;
-    private int difficultyLevel; // Used to simulate game speed (response time)
+    private int difficultyLevel; // simulate game speed (response time)
     private GamePanel gamePanel;
     private String gameSpeed;
 
@@ -22,11 +22,11 @@ public class TicTacToe extends JFrame {
         this.currentScore = currentScore;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // Make the frame full screen
-        setUndecorated(true); // Remove title bar
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // full screen
+        setUndecorated(true);
         setLayout(new BorderLayout());
 
-        JPanel ticTacToePanel = new JPanel(new GridLayout(3, 3)); // Renamed to ticTacToePanel to avoid conflict
+        JPanel ticTacToePanel = new JPanel(new GridLayout(3, 3)); // Renamed to ticTacToePanel to avoid conflict!!!
         JPanel controlPanel = new JPanel(new FlowLayout());
 
         for (int i = 0; i < 9; i++) {
@@ -211,7 +211,7 @@ public class TicTacToe extends JFrame {
     }
 
     private void exitGame() {
-        System.exit(0);  // Terminate the application completely
+        System.exit(0);  // kill the application
     }
 
     public int getScore() {
@@ -228,6 +228,6 @@ public class TicTacToe extends JFrame {
     }
 
     public static void main(String[] args) {
-        new TicTacToe(null, "Player", "Medium", 0);  // Example instantiation with playerName, gameSpeed, currentScore
+        new TicTacToe(null, "Player", "Medium", 0);  // Example instantiation
     }
 }

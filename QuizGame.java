@@ -38,14 +38,14 @@ public class QuizGame {
         ResultSet rs = null;
         
         try {
-            // Connect to the database
+            // ocnnect to the database
             Class.forName("com.mysql.cj.jdbc.Driver");  // JDBC driver
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/snake?useSSL=false&serverTimezone=UTC", "root", "");
             stmt = conn.createStatement();
             String sql = "SELECT question, option1, option2, option3, option4, correct_answer FROM quiz_q";
             rs = stmt.executeQuery(sql);
     
-            // Process result set
+            // process result set
             while (rs.next()) {
                 String[] qData = new String[6];
                 qData[0] = rs.getString("question");
@@ -64,7 +64,7 @@ public class QuizGame {
             questions = questionsList.toArray(new String[0][]);  // Convert to array
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error loading questions: " + e.getMessage());
-            System.exit(1);  // Exit the application
+            System.exit(1);  //exit application
         } finally {
             try {
                 if (rs != null) rs.close();
@@ -79,7 +79,7 @@ public class QuizGame {
     private void setupUI() {
         if (questions == null || questions.length == 0) {
             JOptionPane.showMessageDialog(null, "No questions available to display.");
-            return;  // Handle empty questions scenario
+            return;  // handle empty questions case
         }
     
         frame = new JFrame("Sorting Algorithm Quiz");
@@ -141,6 +141,6 @@ public class QuizGame {
     }
 
     public void startQuiz() {
-        // Placeholder for any future initialization logic
+        // Placeholder for future initialization
     }
 }
